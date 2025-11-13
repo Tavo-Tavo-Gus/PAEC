@@ -1,0 +1,57 @@
+name: NodeJS with Gulp
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+            - nombre: Configurar el entorno de Node.js
+  Usos: actions/setup-node@v6.0.0
+  con:
+    # Configura always-auth en npmrc.
+    always-auth: # opcional, el valor predeterminado es falso
+    # Especificación de la versión a utilizar. Ejemplos: 12.x, 10.15.1, >=10.15.0.
+    node-version: # opcional
+    # Archivo que contiene la especificación de la versión a utilizar. Ejemplos: package.json, .nvmrc, .node-version, .tool-versions.
+    archivo de versión de nodo: # opcional
+    # Arquitectura objetivo que usará Node. Ejemplos: x86, x64. Se usará la arquitectura del sistema por defecto.
+    arquitectura: # opcional
+    # Active esta opción si desea que la acción busque la última versión disponible que cumpla con la especificación de versión.
+    comprobar-últimas: # opcional
+    # Registro opcional para configurar la autenticación. Se configurará el registro en un archivo .npmrc y .yarnrc a nivel de proyecto, y se configurará la autenticación para leer desde env.NODE_AUTH_TOKEN.
+    URL del registro: # opcional
+    # Ámbito opcional para la autenticación con registros con ámbito. Si se utiliza el registro de paquetes de GitHub (https://npm.pkg.github.com/), se recurrirá al propietario del repositorio.
+    ámbito: # opcional
+    # Se usa para obtener las distribuciones de nodos de node-versions. Dado que existe un valor predeterminado, normalmente no lo proporciona el usuario. Al ejecutar esta acción en github.com, el valor predeterminado es suficiente. Al ejecutarla en GHES, puede proporcionar un token de acceso personal para github.com si experimenta limitaciones de frecuencia.
+    token: # opcional, el valor predeterminado es ${{ github.server_url == 'https://github.com' && github.token || '' }}
+    # Se utiliza para especificar un gestor de paquetes para el almacenamiento en caché en el directorio predeterminado. Valores admitidos: npm, yarn, pnpm.
+    caché: # opcional
+    # Establecer en falso para deshabilitar el almacenamiento en caché automático. De forma predeterminada, el almacenamiento en caché está habilitado cuando devEngines.packageManager o el campo packageManager de nivel superior en package.json especifica npm como el administrador de paquetes.
+    caché del gestor de paquetes: # opcional, el valor predeterminado es verdadero
+    # Se utiliza para especificar la ruta a un archivo de dependencia: package-lock.json, yarn.lock, etc. Admite comodines o una lista de nombres de archivo para almacenar en caché varias dependencias.
+    ruta de dependencia de caché: # opcional
+    # Se utiliza para especificar un servidor alternativo para descargar los binarios de Node.js desde
+    espejo: # opcional
+    # El token utilizado como encabezado de autorización al obtener datos del espejo
+    token de espejo: # opcional
+          
+              - name: Build
+      run: |
+        npm install
+        gulp
