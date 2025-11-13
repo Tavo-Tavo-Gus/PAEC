@@ -55,3 +55,24 @@ jobs:
       run: |
         npm install
         gulp
+            - nombre: caché
+  utiliza: actions/cache@v4.3.0
+  con:
+    # Una lista de archivos, directorios y patrones comodín para almacenar en caché y restaurar
+    camino:
+    # Una clave explícita para restaurar y guardar la caché
+    llave:
+    # Cadena multilínea ordenada que enumera las claves que coinciden con el prefijo y que se utilizan para restaurar la caché obsoleta si no se ha encontrado ningún valor para la clave. Tenga en cuenta que `cache-hit` devuelve falso en este caso.
+    restaurar-claves: # opcional
+    # Tamaño del fragmento utilizado para dividir archivos grandes durante la carga, en bytes
+    tamaño de fragmento de carga: # opcional
+    # Valor booleano opcional que, al habilitarse, permite a los ejecutores de Windows guardar o restaurar cachés que se pueden restaurar o guardar respectivamente en otras plataformas.
+    enableCrossOsArchive: # opcional, el valor predeterminado es falso
+    # Fallar el flujo de trabajo si no se encuentra la entrada en la caché
+    fail-on-cache-miss: # opcional, el valor predeterminado es false
+    # Comprobar si existe una entrada en la caché para la(s) entrada(s) dada(s) (clave, claves de restauración) sin descargar la caché
+    solo búsqueda: # opcional, el valor predeterminado es falso
+    # Ejecuta el paso posterior para guardar la caché incluso si falla otro paso anterior
+    guardar-siempre: # opcional, el valor predeterminado es falso
+
+    
