@@ -74,8 +74,8 @@ export function useStudents() {
         throw new Error(response.error);
       }
 
-      return response.data;
       setRetryAfter(null);
+      return response.data;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al agregar estudiante');
       setRetryAfter(null);
@@ -97,8 +97,8 @@ export function useStudents() {
         throw new Error(response.error);
       }
 
-      return response.data;
       setRetryAfter(null);
+      return response.data;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al actualizar estudiante');
       setRetryAfter(null);
@@ -120,8 +120,8 @@ export function useStudents() {
         throw new Error(response.error);
       }
 
-      return response.data || false;
       setRetryAfter(null);
+      return response.data || false;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al eliminar estudiante');
       setRetryAfter(null);
