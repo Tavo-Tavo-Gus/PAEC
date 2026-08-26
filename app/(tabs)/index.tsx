@@ -2,15 +2,16 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndi
 import { useStudents } from '@/hooks/useStudents';
 import { router } from 'expo-router';
 import { Plus } from 'lucide-react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RateLimitNotification } from '@/components/RateLimitNotification';
+import { Student } from '@/types/database.types';
 
 export default function StudentsScreen() {
   const { students, loading, error, retryAfter, refresh } = useStudents();
   const [showRateLimit, setShowRateLimit] = useState(false);
 
-  // Show rate limit notification when retryAfter is set
-  useState(() => {
+
+  useEffect(() => {
     if (retryAfter && error) {
       setShowRateLimit(true);
     }
@@ -34,14 +35,14 @@ export default function StudentsScreen() {
     );
   }
 
-  const renderStudent = ({ item }) => (
-    <TouchableOpacity 
+  const renderStudent = ({ item }: { item: Student }) => (
+    <TouchableOpacity
       style={styles.studentCard}
       onPress={() => router.push(`/students/${item.id}`)}
     >
-      <Image 
-        source={{ uri: item.image_url || 'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg' }} 
-        style={styles.studentImage} 
+      <Image
+        source={{ uri: item.image_url || 'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg' }}
+        style={styles.studentImage}
       />
       <View style={styles.studentInfo}>
         <Text style={styles.studentName}>{item.name}</Text>
@@ -68,7 +69,7 @@ export default function StudentsScreen() {
           refresh();
         }}
       />
-      
+
       <FlatList
         data={students}
         renderItem={renderStudent}
@@ -78,8 +79,8 @@ export default function StudentsScreen() {
           <RefreshControl refreshing={loading} onRefresh={refresh} />
         }
       />
-      
-      <TouchableOpacity 
+
+      <TouchableOpacity
         style={styles.fab}
         onPress={() => router.push('/students/new')}
       >

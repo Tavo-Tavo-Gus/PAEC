@@ -1,16 +1,20 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Modal, FlatList } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useMedications } from '@/hooks/useMedications';
 import { useStudents } from '@/hooks/useStudents';
-import { X, Save } from 'lucide-react-native';
+import { X, Save, ChevronDown, Check } from 'lucide-react-native';
+import { Student } from '@/types/database.types';
 
 export default function NewMedicationScreen() {
   const params = useLocalSearchParams<{ student: string }>();
   const { addMedication } = useMedications();
-  const { students } = useStudents();
+  const { students, loading: loadingStudents } = useStudents();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(params.student || null);
+  const [showStudentSelector, setShowStudentSelector] = useState(false);
 
   const [medication, setMedication] = useState({
     name: '',
@@ -19,15 +23,21 @@ export default function NewMedicationScreen() {
     next_dose: '',
   });
 
-  const student = students.find(s => s.id === params.student);
+  const selectedStudent = students.find(s => s.id === selectedStudentId);
+
+  useEffect(() => {
+    if (params.student) {
+      setSelectedStudentId(params.student);
+    }
+  }, [params.student]);
 
   const handleSave = async () => {
     try {
       setSaving(true);
       setError(null);
 
-      if (!params.student) {
-        throw new Error('No se ha seleccionado un estudiante');
+      if (!selectedStudentId) {
+        throw new Error('Por favor seleccione un estudiante');
       }
 
       if (!medication.name || !medication.dosage || !medication.frequency || !medication.next_dose) {
@@ -35,7 +45,7 @@ export default function NewMedicationScreen() {
       }
 
       const newMedication = await addMedication({
-        student_id: params.student,
+        student_id: selectedStudentId,
         name: medication.name,
         dosage: medication.dosage,
         frequency: medication.frequency,
@@ -53,6 +63,51 @@ export default function NewMedicationScreen() {
       setSaving(false);
     }
   };
+
+  const renderStudentSelector = () => (
+    <Modal
+      visible={showStudentSelector}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={() => setShowStudentSelector(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Seleccionar Estudiante</Text>
+            <TouchableOpacity onPress={() => setShowStudentSelector(false)}>
+              <X size={24} color="#64748b" />
+            </TouchableOpacity>
+          </View>
+
+          <FlatList
+            data={students}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.studentOption}
+                onPress={() => {
+                  setSelectedStudentId(item.id);
+                  setShowStudentSelector(false);
+                }}
+              >
+                <Text style={[
+                  styles.studentOptionText,
+                  selectedStudentId === item.id && styles.studentOptionTextSelected
+                ]}>
+                  {item.name}
+                </Text>
+                {selectedStudentId === item.id && (
+                  <Check size={20} color="#2563eb" />
+                )}
+              </TouchableOpacity>
+            )}
+            style={styles.studentList}
+          />
+        </View>
+      </View>
+    </Modal>
+  );
 
   return (
     <View style={styles.container}>
@@ -82,12 +137,27 @@ export default function NewMedicationScreen() {
       <ScrollView style={styles.form}>
         <View style={styles.studentInfo}>
           <Text style={styles.studentLabel}>Medicamento para:</Text>
-          <Text style={styles.studentName}>{student?.name || 'Estudiante no encontrado'}</Text>
+          {params.student ? (
+            <Text style={styles.studentName}>{selectedStudent?.name || 'Cargando...'}</Text>
+          ) : (
+            <TouchableOpacity
+              style={styles.studentSelectorButton}
+              onPress={() => setShowStudentSelector(true)}
+            >
+              <Text style={[
+                styles.studentSelectorText,
+                !selectedStudent && styles.studentSelectorPlaceholder
+              ]}>
+                {selectedStudent ? selectedStudent.name : 'Seleccionar estudiante'}
+              </Text>
+              <ChevronDown size={20} color="#64748b" />
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Información del Medicamento</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Nombre <Text style={styles.required}>*</Text></Text>
             <TextInput
@@ -129,6 +199,8 @@ export default function NewMedicationScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {renderStudentSelector()}
 
       {saving && (
         <View style={styles.savingOverlay}>
@@ -189,12 +261,29 @@ const styles = StyleSheet.create({
   studentLabel: {
     fontSize: 14,
     color: '#64748b',
-    marginBottom: 4,
+    marginBottom: 8,
   },
   studentName: {
     fontSize: 18,
     fontWeight: '600',
     color: '#1e293b',
+  },
+  studentSelectorButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 12,
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  studentSelectorText: {
+    fontSize: 16,
+    color: '#1e293b',
+  },
+  studentSelectorPlaceholder: {
+    color: '#94a3b8',
   },
   section: {
     backgroundColor: 'white',
@@ -235,5 +324,48 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+  studentList: {
+    padding: 16,
+  },
+  studentOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  studentOptionText: {
+    fontSize: 16,
+    color: '#1e293b',
+  },
+  studentOptionTextSelected: {
+    color: '#2563eb',
+    fontWeight: '600',
   },
 });

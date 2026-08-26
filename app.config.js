@@ -16,9 +16,11 @@ export default {
       "**/*"
     ],
     ios: {
-      supportsTablet: true
+      supportsTablet: true,
+      bundleIdentifier: 'com.anonymous.greenportal'
     },
     android: {
+      package: 'com.anonymous.greenportal',
       adaptiveIcon: {
         foregroundImage: './assets/images/icon.png',
         backgroundColor: '#ffffff'
