@@ -1,8 +1,8 @@
-import { Tabs } from 'expo-router';
-import { Users, ClipboardList, Calendar, Pill } from 'lucide-react-native';
+import { Tabs, router, useRootNavigationState } from 'expo-router';
+import { Users, Calendar, Pill } from 'lucide-react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
-import { router, useRootNavigationState } from 'expo-router';
+import { colors } from '@/constants/colors';
 
 export default function TabLayout() {
   const { session } = useAuth();
@@ -17,7 +17,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#2563eb',
+        tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: '#64748b',
         tabBarStyle: {
           borderTopWidth: 1,
@@ -34,15 +34,6 @@ export default function TabLayout() {
           tabBarIcon: ({ size, color }) => <Users size={size} color={color} />,
           headerShown: true,
           headerTitle: 'Lista de Estudiantes',
-        }}
-      />
-      <Tabs.Screen
-        name="support-plans"
-        options={{
-          title: 'Planes',
-          tabBarIcon: ({ size, color }) => <ClipboardList size={size} color={color} />,
-          headerShown: true,
-          headerTitle: 'Planes de Acompañamiento',
         }}
       />
       <Tabs.Screen

@@ -1,49 +1,72 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useStudents } from '@/hooks/useStudents';
 import { useEvents } from '@/hooks/useEvents';
-import { format } from 'date-fns';
+import { useMedications } from '@/hooks/useMedications';
+import type { Event, Medication } from '@/types/database.types';
+import { addDays, format, isSameDay, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { colors } from '@/constants/colors';
 
 export default function CalendarScreen() {
+  const { student: studentParam } = useLocalSearchParams<{ student?: string }>();
   const { students, loading: studentsLoading, error: studentsError } = useStudents();
-  const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<string | null>(studentParam ?? null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const { events, loading: eventsLoading, error: eventsError } = useEvents(selectedStudent);
+  const { medications, loading: medicationsLoading, error: medicationsError } = useMedications(selectedStudent ?? undefined);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const getEventColor = (type: string) => {
     switch (type) {
       case 'therapy':
-        return '#818cf8';
+        return colors.eventTherapy;
       case 'medication':
-        return '#34d399';
+        return colors.eventMedication;
       case 'evaluation':
-        return '#fb923c';
+        return colors.eventEvaluation;
       default:
         return '#94a3b8';
     }
   };
 
-  if (studentsLoading || eventsLoading) {
+  if (studentsLoading || eventsLoading || medicationsLoading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
-  if (studentsError || eventsError) {
+  if (studentsError || eventsError || medicationsError) {
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.errorText}>
-          {studentsError || eventsError}
+          {studentsError || eventsError || medicationsError}
         </Text>
       </View>
     );
   }
 
   const selectedStudentData = students.find(s => s.id === selectedStudent);
+  const dateLabel = format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es });
+  const medicationEvents: Event[] = medications.map((medication: Medication) => ({
+    id: `medication-${medication.id}`,
+    student_id: medication.student_id,
+    title: `Medicamento: ${medication.name}`,
+    type: 'medication',
+    start_time: medication.next_dose,
+    end_time: medication.next_dose,
+    created_at: medication.created_at,
+    updated_at: medication.updated_at,
+  }));
+  const eventsForSelectedDate = [...events, ...medicationEvents].filter(event =>
+    isSameDay(new Date(event.start_time), selectedDate)
+  ).sort((firstEvent, secondEvent) =>
+    new Date(firstEvent.start_time).getTime() - new Date(secondEvent.start_time).getTime()
+  );
 
   return (
     <View style={styles.container}>
@@ -80,14 +103,33 @@ export default function CalendarScreen() {
         <ScrollView style={styles.content}>
           <View style={styles.todayHeader}>
             <Text style={styles.todayTitle}>Calendario de {selectedStudentData?.name}</Text>
-            <Text style={styles.todayDate}>
-              {format(new Date(), "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
-            </Text>
+            <View style={styles.dateNavigation}>
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setSelectedDate(currentDate => addDays(currentDate, -1))}
+                accessibilityLabel="Día anterior"
+              >
+                <ChevronLeft size={20} color={colors.primary} />
+              </TouchableOpacity>
+              <Text style={styles.todayDate}>{dateLabel}</Text>
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setSelectedDate(currentDate => addDays(currentDate, 1))}
+                accessibilityLabel="Día siguiente"
+              >
+                <ChevronRight size={20} color={colors.primary} />
+              </TouchableOpacity>
+            </View>
+            {!isToday(selectedDate) && (
+              <TouchableOpacity style={styles.todayButton} onPress={() => setSelectedDate(new Date())}>
+                <Text style={styles.todayButtonText}>Volver a hoy</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           <View style={styles.timeline}>
-            {events.length > 0 ? (
-              events.map((event) => (
+            {eventsForSelectedDate.length > 0 ? (
+              eventsForSelectedDate.map((event) => (
                 <View key={event.id} style={styles.eventContainer}>
                   <View style={styles.timeColumn}>
                     <Text style={styles.timeText}>
@@ -109,7 +151,7 @@ export default function CalendarScreen() {
               ))
             ) : (
               <View style={styles.noEventsContainer}>
-                <Text style={styles.noEventsText}>No hay eventos programados para hoy</Text>
+                <Text style={styles.noEventsText}>No hay eventos programados para este día</Text>
               </View>
             )}
           </View>
@@ -137,7 +179,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8fafc',
   },
   errorText: {
-    color: '#dc2626',
+    color: colors.error,
     fontSize: 16,
     textAlign: 'center',
     marginHorizontal: 20,
@@ -209,6 +251,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#64748b',
     textTransform: 'capitalize',
+    flex: 1,
+    textAlign: 'center',
+  },
+  dateNavigation: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  dateButton: {
+    padding: 8,
+    backgroundColor: colors.primaryBackground,
+    borderRadius: 8,
+  },
+  todayButton: {
+    alignSelf: 'center',
+    marginTop: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  todayButtonText: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: '600',
   },
   timeline: {
     padding: 16,

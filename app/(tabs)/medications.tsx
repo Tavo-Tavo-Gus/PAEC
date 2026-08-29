@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { useLocalSearchParams, router } from 'expo-router';
 import { Plus, Search, Pill, Clock, User } from 'lucide-react-native';
 import { useMedications } from '../../hooks/useMedications';
 import { useStudents } from '../../hooks/useStudents';
+import { colors } from '@/constants/colors';
 
 export default function MedicationsScreen() {
+  const { student: studentParam } = useLocalSearchParams<{ student?: string }>();
   const [searchQuery, setSearchQuery] = useState('');
-  const { medications, loading, deleteMedication } = useMedications();
+  const { medications, loading } = useMedications(studentParam ?? undefined);
   const { students } = useStudents();
 
   const getStudentName = (studentId: string) => {
@@ -21,21 +23,6 @@ export default function MedicationsScreen() {
     getStudentName(medication.student_id || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleDelete = (id: string, name: string) => {
-    Alert.alert(
-      'Eliminar Medicamento',
-      `¿Estás seguro de que quieres eliminar ${name}?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Eliminar', 
-          style: 'destructive',
-          onPress: () => deleteMedication(id)
-        }
-      ]
-    );
-  };
-
   const renderMedication = ({ item }: { item: any }) => (
     <TouchableOpacity 
       style={styles.medicationCard}
@@ -43,7 +30,7 @@ export default function MedicationsScreen() {
     >
       <View style={styles.medicationHeader}>
         <View style={styles.medicationIcon}>
-          <Pill size={24} color="#3B82F6" />
+          <Pill size={24} color={colors.primary} />
         </View>
         <View style={styles.medicationInfo}>
           <Text style={styles.medicationName}>{item.name}</Text>
@@ -263,7 +250,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#3B82F6',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',

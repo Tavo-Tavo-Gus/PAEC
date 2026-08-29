@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSupportPlans } from '@/hooks/useSupportPlans';
 import { useStudents } from '@/hooks/useStudents';
 import { X, Save, Plus, Trash2 } from 'lucide-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '@/constants/colors';
 
 export default function NewPlanScreen() {
   const params = useLocalSearchParams<{ student: string }>();
@@ -94,7 +96,7 @@ export default function NewPlanScreen() {
               style={styles.removeButton}
               onPress={() => removeItem(index, items, setItems)}
             >
-              <Trash2 size={20} color="#dc2626" />
+              <Trash2 size={20} color={colors.error} />
             </TouchableOpacity>
           )}
         </View>
@@ -103,7 +105,7 @@ export default function NewPlanScreen() {
         style={styles.addButton}
         onPress={() => addItem(items, setItems)}
       >
-        <Plus size={20} color="#2563eb" />
+        <Plus size={20} color={colors.primary} />
         <Text style={styles.addButtonText}>Agregar {title.toLowerCase()}</Text>
       </TouchableOpacity>
     </View>
@@ -111,22 +113,24 @@ export default function NewPlanScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => router.back()}
-        >
-          <X size={24} color="#64748b" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Nuevo Plan de Apoyo</Text>
-        <TouchableOpacity
-          style={[styles.saveButton, saving && styles.saveButtonDisabled]}
-          onPress={handleSave}
-          disabled={saving}
-        >
-          <Save size={24} color={saving ? "#94a3b8" : "#2563eb"} />
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView edges={['top']} style={{ backgroundColor: 'white' }}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => router.back()}
+          >
+            <X size={24} color="#64748b" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Nuevo Plan de Apoyo</Text>
+          <TouchableOpacity
+            style={[styles.saveButton, saving && styles.saveButtonDisabled]}
+            onPress={handleSave}
+            disabled={saving}
+          >
+            <Save size={24} color={saving ? "#94a3b8" : colors.primary} />
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
 
       {error && (
         <View style={styles.errorContainer}>
@@ -164,7 +168,7 @@ export default function NewPlanScreen() {
 
       {saving && (
         <View style={styles.savingOverlay}>
-          <ActivityIndicator size="large" color="#2563eb" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       )}
     </View>
@@ -200,12 +204,12 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   errorContainer: {
-    backgroundColor: '#fef2f2',
+    backgroundColor: colors.errorBackground,
     padding: 16,
     marginBottom: 16,
   },
   errorText: {
-    color: '#dc2626',
+    color: colors.error,
     fontSize: 16,
     textAlign: 'center',
   },
@@ -262,14 +266,14 @@ const styles = StyleSheet.create({
   removeButton: {
     marginLeft: 12,
     padding: 12,
-    backgroundColor: '#fef2f2',
+    backgroundColor: colors.errorBackground,
     borderRadius: 8,
   },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#eff6ff',
+    backgroundColor: colors.primaryBackground,
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
@@ -279,7 +283,7 @@ const styles = StyleSheet.create({
   addButtonText: {
     marginLeft: 8,
     fontSize: 16,
-    color: '#2563eb',
+    color: colors.primary,
     fontWeight: '500',
   },
   savingOverlay: {

@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { authRateLimiter } from '@/lib/rateLimiter';
 import { RateLimitNotification } from '@/components/RateLimitNotification';
 import { router, Link } from 'expo-router';
+import { colors } from '@/constants/colors';
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState('');
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.primary,
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
@@ -149,7 +150,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   errorText: {
-    color: '#dc2626',
+    color: colors.error,
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -163,7 +164,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   linkText: {
-    color: '#2563eb',
+    color: colors.primary,
     fontSize: 14,
     fontWeight: '500',
   },

@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { apiRateLimiter, databaseRateLimiter } from './rateLimiter';
+import { databaseRateLimiter } from './rateLimiter';
 import { rateLimitHandler } from './errorHandler';
 
 interface ApiResponse<T> {
@@ -19,14 +19,14 @@ class ApiClient {
     });
   }
 
-  private async checkRateLimit(endpoint: string): Promise<boolean> {
-    return databaseRateLimiter.isAllowed(endpoint, this.userId);
+  private checkRateLimit(endpoint: string): boolean {
+    return databaseRateLimiter.isAllowed(endpoint, this.userId || undefined);
   }
 
   private createRateLimitError(): ApiResponse<null> {
-    const resetTime = databaseRateLimiter.getResetTime('database', this.userId);
+    const resetTime = databaseRateLimiter.getResetTime('database', this.userId || undefined);
     const waitTime = Math.ceil((resetTime - Date.now()) / 1000);
-    
+
     return {
       data: null,
       error: `Demasiadas solicitudes. Intenta de nuevo en ${waitTime} segundos.`,
@@ -36,7 +36,7 @@ class ApiClient {
   }
 
   private async executeWithRetry<T>(
-    operation: () => Promise<{ data: T | null; error: any }>,
+    operation: () => PromiseLike<{ data: T | null; error: any }>,
     endpoint: string
   ): Promise<ApiResponse<T>> {
     try {
@@ -88,6 +88,13 @@ class ApiClient {
   }
 
   async createStudent(student: any): Promise<ApiResponse<any>> {
+    if (!this.userId) {
+      return {
+        data: null,
+        error: 'Usuario no autenticado',
+        rateLimited: false,
+      };
+    }
     return this.executeWithRetry(
       () => supabase
         .from('students')
@@ -128,22 +135,29 @@ class ApiClient {
   async getMedications(studentId?: string): Promise<ApiResponse<any[]>> {
     return this.executeWithRetry(
       () => {
-      let query = supabase
-        .from('medications')
-        .select('*')
-        .order('next_dose');
+        let query = supabase
+          .from('medications')
+          .select('*')
+          .order('next_dose');
 
-      if (studentId) {
-        query = query.eq('student_id', studentId);
-      }
+        if (studentId) {
+          query = query.eq('student_id', studentId);
+        }
 
-      return query;
+        return query;
       },
       'medications:read'
     );
   }
 
   async createMedication(medication: any): Promise<ApiResponse<any>> {
+    if (!this.userId) {
+      return {
+        data: null,
+        error: 'Usuario no autenticado',
+        rateLimited: false,
+      };
+    }
     return this.executeWithRetry(
       () => supabase
         .from('medications')
@@ -157,22 +171,29 @@ class ApiClient {
   async getSupportPlans(studentId?: string): Promise<ApiResponse<any[]>> {
     return this.executeWithRetry(
       () => {
-      let query = supabase
-        .from('support_plans')
-        .select('*')
-        .order('created_at', { ascending: false });
+        let query = supabase
+          .from('support_plans')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      if (studentId) {
-        query = query.eq('student_id', studentId);
-      }
+        if (studentId) {
+          query = query.eq('student_id', studentId);
+        }
 
-      return query;
+        return query;
       },
       'support_plans:read'
     );
   }
 
   async createSupportPlan(plan: any): Promise<ApiResponse<any>> {
+    if (!this.userId) {
+      return {
+        data: null,
+        error: 'Usuario no autenticado',
+        rateLimited: false,
+      };
+    }
     return this.executeWithRetry(
       () => supabase
         .from('support_plans')

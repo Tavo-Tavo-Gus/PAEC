@@ -3,11 +3,13 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIn
 import { useLocalSearchParams, router } from 'expo-router';
 import { useStudents } from '@/hooks/useStudents';
 import { ArrowLeft, Pencil, Trash2, Calendar, Pill, ClipboardList } from 'lucide-react-native';
+import type { Student } from '@/types/database.types';
+import { colors } from '@/constants/colors';
 
 export default function StudentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { students, deleteStudent, loading, error } = useStudents();
-  const [student, setStudent] = useState(null);
+  const [student, setStudent] = useState<Student | null>(null);
 
   useEffect(() => {
     if (students && id) {
@@ -41,7 +43,7 @@ export default function StudentDetailScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -76,13 +78,13 @@ export default function StudentDetailScreen() {
             style={styles.editButton}
             onPress={() => router.push(`/students/edit?id=${id}`)}
           >
-            <Pencil size={20} color="#2563eb" />
+            <Pencil size={20} color={colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.deleteButton}
             onPress={handleDelete}
           >
-            <Trash2 size={20} color="#dc2626" />
+            <Trash2 size={20} color={colors.error} />
           </TouchableOpacity>
         </View>
       </View>
@@ -107,7 +109,7 @@ export default function StudentDetailScreen() {
             style={styles.actionButton}
             onPress={() => router.push(`/(tabs)/calendar?student=${id}`)}
           >
-            <Calendar size={24} color="#2563eb" />
+            <Calendar size={24} color={colors.primary} />
             <Text style={styles.actionText}>Calendario</Text>
           </TouchableOpacity>
 
@@ -115,7 +117,7 @@ export default function StudentDetailScreen() {
             style={styles.actionButton}
             onPress={() => router.push(`/(tabs)/medications?student=${id}`)}
           >
-            <Pill size={24} color="#2563eb" />
+            <Pill size={24} color={colors.primary} />
             <Text style={styles.actionText}>Medicamentos</Text>
           </TouchableOpacity>
 
@@ -123,7 +125,7 @@ export default function StudentDetailScreen() {
             style={styles.actionButton}
             onPress={() => router.push(`/(tabs)/support-plans?student=${id}`)}
           >
-            <ClipboardList size={24} color="#2563eb" />
+            <ClipboardList size={24} color={colors.primary} />
             <Text style={styles.actionText}>Plan de Apoyo</Text>
           </TouchableOpacity>
         </View>
@@ -161,12 +163,12 @@ const styles = StyleSheet.create({
   },
   editButton: {
     padding: 8,
-    backgroundColor: '#eff6ff',
+    backgroundColor: colors.primaryBackground,
     borderRadius: 8,
   },
   deleteButton: {
     padding: 8,
-    backgroundColor: '#fef2f2',
+    backgroundColor: colors.errorBackground,
     borderRadius: 8,
   },
   content: {
@@ -224,17 +226,17 @@ const styles = StyleSheet.create({
   actionText: {
     marginTop: 8,
     fontSize: 14,
-    color: '#2563eb',
+    color: colors.primary,
     fontWeight: '500',
   },
   errorText: {
-    color: '#dc2626',
+    color: colors.error,
     fontSize: 16,
     marginBottom: 16,
     textAlign: 'center',
   },
   backButtonText: {
-    color: '#2563eb',
+    color: colors.primary,
     fontSize: 16,
     fontWeight: '500',
   },

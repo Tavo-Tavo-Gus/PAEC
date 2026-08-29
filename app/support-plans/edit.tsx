@@ -4,6 +4,8 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { useSupportPlans } from '@/hooks/useSupportPlans';
 import { useStudents } from '@/hooks/useStudents';
 import { X, Save, Plus, Trash2 } from 'lucide-react-native';
+import type { Student } from '@/types/database.types';
+import { colors } from '@/constants/colors';
 
 export default function EditPlanScreen() {
   const params = useLocalSearchParams<{ id: string }>();
@@ -15,7 +17,7 @@ export default function EditPlanScreen() {
   const [supportNeeds, setSupportNeeds] = useState<string[]>(['']);
   const [skills, setSkills] = useState<string[]>(['']);
   const [triggers, setTriggers] = useState<string[]>(['']);
-  const [student, setStudent] = useState(null);
+  const [student, setStudent] = useState<Student | undefined>(undefined);
 
   useEffect(() => {
     if (supportPlans && params.id) {
@@ -87,7 +89,7 @@ export default function EditPlanScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -122,7 +124,7 @@ export default function EditPlanScreen() {
               style={styles.removeButton}
               onPress={() => removeItem(index, items, setItems)}
             >
-              <Trash2 size={20} color="#dc2626" />
+              <Trash2 size={20} color={colors.error} />
             </TouchableOpacity>
           )}
         </View>
@@ -131,7 +133,7 @@ export default function EditPlanScreen() {
         style={styles.addButton}
         onPress={() => addItem(items, setItems)}
       >
-        <Plus size={20} color="#2563eb" />
+        <Plus size={20} color={colors.primary} />
         <Text style={styles.addButtonText}>Agregar {title.toLowerCase()}</Text>
       </TouchableOpacity>
     </View>
@@ -152,7 +154,7 @@ export default function EditPlanScreen() {
           onPress={handleSave}
           disabled={saving}
         >
-          <Save size={24} color={saving ? "#94a3b8" : "#2563eb"} />
+            <Save size={24} color={saving ? "#94a3b8" : colors.primary} />
         </TouchableOpacity>
       </View>
 
@@ -192,7 +194,7 @@ export default function EditPlanScreen() {
 
       {saving && (
         <View style={styles.savingOverlay}>
-          <ActivityIndicator size="large" color="#2563eb" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       )}
     </View>
@@ -234,12 +236,12 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   errorContainer: {
-    backgroundColor: '#fef2f2',
+    backgroundColor: colors.errorBackground,
     padding: 16,
     marginBottom: 16,
   },
   errorText: {
-    color: '#dc2626',
+    color: colors.error,
     fontSize: 16,
     textAlign: 'center',
   },
@@ -296,14 +298,14 @@ const styles = StyleSheet.create({
   removeButton: {
     marginLeft: 12,
     padding: 12,
-    backgroundColor: '#fef2f2',
+    backgroundColor: colors.errorBackground,
     borderRadius: 8,
   },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#eff6ff',
+    backgroundColor: colors.primaryBackground,
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
@@ -313,7 +315,7 @@ const styles = StyleSheet.create({
   addButtonText: {
     marginLeft: 8,
     fontSize: 16,
-    color: '#2563eb',
+    color: colors.primary,
     fontWeight: '500',
   },
   savingOverlay: {

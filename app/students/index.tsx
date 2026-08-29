@@ -3,6 +3,8 @@ import { router } from 'expo-router';
 import { Plus, Search } from 'lucide-react-native';
 import { useStudents } from '@/hooks/useStudents';
 import { useState } from 'react';
+import type { Student } from '@/types/database.types';
+import { colors } from '@/constants/colors';
 
 export default function StudentsScreen() {
   const { students, loading, error, refresh } = useStudents();
@@ -17,7 +19,7 @@ export default function StudentsScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -33,7 +35,7 @@ export default function StudentsScreen() {
     );
   }
 
-  const renderStudent = ({ item }) => (
+  const renderStudent = ({ item }: { item: Student }) => (
     <TouchableOpacity 
       style={styles.studentCard}
       onPress={() => router.push(`/students/${item.id}`)}
@@ -141,14 +143,14 @@ const styles = StyleSheet.create({
     color: '#1e293b',
   },
   errorText: {
-    color: '#dc2626',
+    color: colors.error,
     fontSize: 16,
     textAlign: 'center',
     marginHorizontal: 20,
     marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
@@ -213,7 +215,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 16,
     bottom: 16,
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.primary,
     width: 56,
     height: 56,
     borderRadius: 28,

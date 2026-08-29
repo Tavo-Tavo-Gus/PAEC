@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Shield, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle, RefreshCw, Wrench } from 'lucide-react-native';
 import { useDatabaseSecurity } from '@/hooks/useDatabaseSecurity';
+import { colors } from '@/constants/colors';
 
 export function SecurityDashboard() {
   const { 
@@ -16,7 +17,7 @@ export function SecurityDashboard() {
   if (loading && !report) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Generando reporte de seguridad...</Text>
       </View>
     );
@@ -25,7 +26,7 @@ export function SecurityDashboard() {
   if (error) {
     return (
       <View style={styles.errorContainer}>
-        <AlertTriangle size={48} color="#dc2626" />
+        <AlertTriangle size={48} color={colors.error} />
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity style={styles.retryButton} onPress={generateReport}>
           <Text style={styles.retryButtonText}>Reintentar</Text>
@@ -51,7 +52,7 @@ export function SecurityDashboard() {
     if (score >= 90) return { level: 'EXCELENTE', color: '#10b981' };
     if (score >= 70) return { level: 'BUENO', color: '#f59e0b' };
     if (score >= 50) return { level: 'REGULAR', color: '#f97316' };
-    return { level: 'CRÍTICO', color: '#dc2626' };
+    return { level: 'CRÍTICO', color: colors.error };
   };
 
   const securityLevel = getSecurityLevel();
@@ -59,7 +60,7 @@ export function SecurityDashboard() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Shield size={32} color="#2563eb" />
+        <Shield size={32} color={colors.primary} />
         <Text style={styles.title}>Dashboard de Seguridad</Text>
       </View>
 
@@ -85,7 +86,7 @@ export function SecurityDashboard() {
         </View>
 
         <View style={styles.summaryCard}>
-          <AlertTriangle size={24} color="#dc2626" />
+          <AlertTriangle size={24} color={colors.error} />
           <Text style={styles.summaryNumber}>{summary.vulnerableFunctions}</Text>
           <Text style={styles.summaryLabel}>Vulnerables</Text>
         </View>
@@ -165,7 +166,7 @@ export function SecurityDashboard() {
 function getStatusColor(status: string): string {
   switch (status) {
     case 'SECURE': return '#10b981';
-    case 'VULNERABLE': return '#dc2626';
+    case 'VULNERABLE': return colors.error;
     case 'NEEDS_REVIEW': return '#f59e0b';
     default: return '#6b7280';
   }
@@ -196,12 +197,12 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#dc2626',
+    color: colors.error,
     textAlign: 'center',
     marginVertical: 16,
   },
   retryButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
@@ -296,10 +297,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   primaryButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.primary,
   },
   warningButton: {
-    backgroundColor: '#dc2626',
+    backgroundColor: colors.error,
   },
   primaryButtonText: {
     color: 'white',

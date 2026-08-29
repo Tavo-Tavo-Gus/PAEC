@@ -1,14 +1,14 @@
 export default {
   expo: {
-    name: 'green-portal',
-    slug: 'green-portal',
+    name: 'PAEC',
+    slug: 'paec',
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
-    scheme: 'myapp',
+    scheme: 'paec',
     userInterfaceStyle: 'automatic',
     splash: {
-      image: './assets/images/favicon.png',
+      image: './assets/images/icon.png',
       resizeMode: 'contain',
       backgroundColor: '#ffffff'
     },
@@ -17,10 +17,10 @@ export default {
     ],
     ios: {
       supportsTablet: true,
-      bundleIdentifier: 'com.anonymous.greenportal'
+      bundleIdentifier: 'com.gustavoarias.paec'
     },
     android: {
-      package: 'com.anonymous.greenportal',
+      package: 'com.gustavoarias.paec',
       adaptiveIcon: {
         foregroundImage: './assets/images/icon.png',
         backgroundColor: '#ffffff'
@@ -32,7 +32,10 @@ export default {
       output: 'server'
     },
     plugins: [
-      'expo-router'
+      'expo-router',
+      'expo-font',
+      'expo-web-browser',
+      '@react-native-community/datetimepicker'
     ],
     experiments: {
       typedRoutes: true
@@ -40,6 +43,9 @@ export default {
     extra: {
       supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
       supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+      eas: {
+        projectId: "503f6271-f2fd-445f-a519-8225df8bf6a8"
+      }
     }
   }
 };

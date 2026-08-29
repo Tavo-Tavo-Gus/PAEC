@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { TriangleAlert as AlertTriangle } from 'lucide-react-native';
+import { colors } from '@/constants/colors';
 
 interface RateLimitNotificationProps {
   visible: boolean;
@@ -61,17 +62,17 @@ export function RateLimitNotification({
     switch (type) {
       case 'error':
         return {
-          backgroundColor: '#fef2f2',
+          backgroundColor: colors.errorBackground,
           borderColor: '#fecaca',
-          iconColor: '#dc2626',
-          textColor: '#dc2626',
+          iconColor: colors.error,
+          textColor: colors.error,
         };
       case 'info':
         return {
-          backgroundColor: '#eff6ff',
+          backgroundColor: colors.primaryBackground,
           borderColor: '#bfdbfe',
-          iconColor: '#2563eb',
-          textColor: '#2563eb',
+          iconColor: colors.primary,
+          textColor: colors.primary,
         };
       default:
         return {

@@ -1,9 +1,3 @@
-interface RateLimitError {
-  status: number;
-  retryAfter?: number;
-  message: string;
-}
-
 interface RetryConfig {
   maxRetries: number;
   baseDelay: number;

@@ -4,6 +4,8 @@ import { Save, X } from 'lucide-react-native';
 import { useStudents } from '@/hooks/useStudents';
 import { useState, useEffect } from 'react';
 import type { Student } from '@/types/database.types';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '@/constants/colors';
 
 export default function EditStudentScreen() {
   const params = useLocalSearchParams<{ id: string }>();
@@ -33,10 +35,10 @@ export default function EditStudentScreen() {
 
   const handleSave = async () => {
     if (!params.id) return;
-    
+
     setSaving(true);
     setSaveError(null);
-    
+
     try {
       const result = await updateStudent(params.id, student);
       if (result) {
@@ -54,7 +56,7 @@ export default function EditStudentScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -69,22 +71,24 @@ export default function EditStudentScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => router.back()}
-        >
-          <X size={24} color="#64748b" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Editar Perfil</Text>
-        <TouchableOpacity
-          style={[styles.saveButton, saving && styles.saveButtonDisabled]}
-          onPress={handleSave}
-          disabled={saving}
-        >
-          <Save size={24} color={saving ? "#94a3b8" : "#2563eb"} />
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView edges={['top']} style={{ backgroundColor: 'white' }}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => router.back()}
+          >
+            <X size={24} color="#64748b" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Editar Perfil</Text>
+          <TouchableOpacity
+            style={[styles.saveButton, saving && styles.saveButtonDisabled]}
+            onPress={handleSave}
+            disabled={saving}
+          >
+            <Save size={24} color={saving ? "#94a3b8" : colors.primary} />
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
 
       {saveError && (
         <View style={styles.errorContainer}>
@@ -95,7 +99,7 @@ export default function EditStudentScreen() {
       <ScrollView style={styles.form}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Información Personal</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Nombre</Text>
             <TextInput
@@ -187,12 +191,12 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   errorContainer: {
-    backgroundColor: '#fef2f2',
+    backgroundColor: colors.errorBackground,
     padding: 16,
     marginBottom: 16,
   },
   errorText: {
-    color: '#dc2626',
+    color: colors.error,
     fontSize: 16,
     textAlign: 'center',
   },

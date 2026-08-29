@@ -1,7 +1,8 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
+import { colors } from '@/constants/colors';
 
 type AuthContextType = {
   session: Session | null;
@@ -71,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Conectando...</Text>
       </View>
     );
@@ -110,7 +111,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    color: '#dc2626',
+    color: colors.error,
     textAlign: 'center',
     marginBottom: 12,
   },

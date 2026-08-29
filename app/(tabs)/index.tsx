@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import { RateLimitNotification } from '@/components/RateLimitNotification';
 import { Student } from '@/types/database.types';
+import { colors } from '@/constants/colors';
 
 export default function StudentsScreen() {
   const { students, loading, error, retryAfter, refresh } = useStudents();
@@ -19,7 +20,7 @@ export default function StudentsScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -75,6 +76,15 @@ export default function StudentsScreen() {
         renderItem={renderStudent}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
+        ListHeaderComponent={
+          <View style={styles.brandHeader}>
+            <Image source={require('../../assets/images/icon.png')} style={styles.logo} />
+            <View>
+              <Text style={styles.brandName}>PAEC</Text>
+              <Text style={styles.brandSubtitle}>Acompañamiento educativo</Text>
+            </View>
+          </View>
+        }
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={refresh} />
         }
@@ -102,14 +112,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8fafc',
   },
   errorText: {
-    color: '#dc2626',
+    color: colors.error,
     fontSize: 16,
     textAlign: 'center',
     marginHorizontal: 20,
     marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
@@ -121,6 +131,38 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 16,
+  },
+  brandHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  logo: {
+    width: 56,
+    height: 56,
+    borderRadius: 12,
+    marginRight: 14,
+  },
+  brandName: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: 2,
+  },
+  brandSubtitle: {
+    fontSize: 14,
+    color: '#64748b',
   },
   studentCard: {
     backgroundColor: 'white',
@@ -174,7 +216,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 16,
     bottom: 16,
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.primary,
     width: 56,
     height: 56,
     borderRadius: 28,

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Medication } from '@/types/database.types';
 
@@ -7,23 +7,7 @@ export function useMedications(studentId?: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchMedications();
-
-    // Subscribe to changes
-    const subscription = supabase
-      .channel('medications_channel')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'medications' }, () => {
-        fetchMedications();
-      })
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [studentId]);
-
-  async function fetchMedications() {
+  const fetchMedications = useCallback(async function fetchMedications() {
     try {
       let query = supabase
         .from('medications')
@@ -44,13 +28,34 @@ export function useMedications(studentId?: string) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [studentId]);
 
-  async function addMedication(medication: Omit<Medication, 'id' | 'created_at' | 'updated_at'>) {
+  useEffect(() => {
+    fetchMedications();
+
+    // Subscribe to changes
+    const subscription = supabase
+      .channel('medications_channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'medications' }, () => {
+        fetchMedications();
+      })
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [fetchMedications]);
+
+  async function addMedication(medication: Omit<Medication, 'id' | 'created_at' | 'updated_at' | 'user_id'>) {
     try {
+      setError(null);
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
+      if (!user) throw new Error('Usuario no autenticado');
+
       const { data, error } = await supabase
         .from('medications')
-        .insert([medication])
+        .insert([{ ...medication, user_id: user.id }])
         .select()
         .single();
 
@@ -58,8 +63,13 @@ export function useMedications(studentId?: string) {
 
       return data;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return null;
+      const message = err instanceof Error
+        ? err.message
+        : typeof err === 'object' && err !== null && 'message' in err
+          ? String(err.message)
+          : 'No se pudo guardar el medicamento';
+      setError(message);
+      throw new Error(message);
     }
   }
 

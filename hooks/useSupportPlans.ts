@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { SupportPlan } from '@/types/database.types';
 
@@ -7,23 +7,7 @@ export function useSupportPlans(studentId?: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchSupportPlans();
-
-    // Subscribe to changes
-    const subscription = supabase
-      .channel('support_plans_channel')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_plans' }, () => {
-        fetchSupportPlans();
-      })
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [studentId]);
-
-  async function fetchSupportPlans() {
+  const fetchSupportPlans = useCallback(async function fetchSupportPlans() {
     try {
       setLoading(true);
       setError(null);
@@ -47,7 +31,23 @@ export function useSupportPlans(studentId?: string) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [studentId]);
+
+  useEffect(() => {
+    fetchSupportPlans();
+
+    // Subscribe to changes
+    const subscription = supabase
+      .channel('support_plans_channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_plans' }, () => {
+        fetchSupportPlans();
+      })
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [fetchSupportPlans]);
 
   async function addSupportPlan(plan: Omit<SupportPlan, 'id' | 'created_at' | 'updated_at'>) {
     try {

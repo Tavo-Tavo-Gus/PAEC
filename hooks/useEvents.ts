@@ -2,19 +2,27 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Event } from '@/types/database.types';
 
-export function useEvents(studentId?: string) {
+export function useEvents(studentId?: string | null) {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchEvents();
+    if (!studentId) {
+      setEvents([]);
+      setLoading(false);
+      return;
+    }
+
+    const currentStudentId = studentId;
+    setLoading(true);
+    fetchEvents(currentStudentId);
 
     // Subscribe to changes
     const subscription = supabase
       .channel('events_channel')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
-        fetchEvents();
+        fetchEvents(currentStudentId);
       })
       .subscribe();
 
@@ -23,22 +31,22 @@ export function useEvents(studentId?: string) {
     };
   }, [studentId]);
 
-  async function fetchEvents() {
+  async function fetchEvents(currentStudentId: string) {
     try {
       let query = supabase
         .from('events')
         .select('*')
         .order('start_time');
 
-      if (studentId) {
-        query = query.eq('student_id', studentId);
-      }
+      query = query
+        .eq('student_id', currentStudentId)
 
       const { data, error } = await query;
 
       if (error) throw error;
 
-      setEvents(data);
+      setEvents(data || []);
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {

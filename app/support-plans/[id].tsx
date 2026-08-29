@@ -3,14 +3,16 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSupportPlans } from '@/hooks/useSupportPlans';
 import { useStudents } from '@/hooks/useStudents';
-import { ArrowLeft, Pencil, Trash2, Users, Brain, TriangleAlert as AlertTriangle, Target } from 'lucide-react-native';
+import { ArrowLeft, Pencil, Trash2, Brain, TriangleAlert as AlertTriangle, Target } from 'lucide-react-native';
+import type { Student, SupportPlan } from '@/types/database.types';
+import { colors } from '@/constants/colors';
 
 export default function PlanDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { supportPlans, deleteSupportPlan, loading, error } = useSupportPlans();
   const { students } = useStudents();
-  const [plan, setPlan] = useState(null);
-  const [student, setStudent] = useState(null);
+  const [plan, setPlan] = useState<SupportPlan | null>(null);
+  const [student, setStudent] = useState<Student | undefined>(undefined);
 
   useEffect(() => {
     if (supportPlans && id) {
@@ -46,7 +48,7 @@ export default function PlanDetailScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -67,7 +69,17 @@ export default function PlanDetailScreen() {
     );
   }
 
-  const Section = ({ title, icon, items, emptyText }) => (
+  const Section = ({
+    title,
+    icon,
+    items,
+    emptyText,
+  }: {
+    title: string;
+    icon: React.ReactNode;
+    items: string[];
+    emptyText: string;
+  }) => (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
         {icon}
@@ -102,13 +114,13 @@ export default function PlanDetailScreen() {
             style={styles.editButton}
             onPress={() => router.push(`/support-plans/edit?id=${id}`)}
           >
-            <Pencil size={20} color="#2563eb" />
+            <Pencil size={20} color={colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.deleteButton}
             onPress={handleDelete}
           >
-            <Trash2 size={20} color="#dc2626" />
+            <Trash2 size={20} color={colors.error} />
           </TouchableOpacity>
         </View>
       </View>
@@ -139,7 +151,7 @@ export default function PlanDetailScreen() {
 
         <Section
           title="Necesidades de Apoyo"
-          icon={<Target size={24} color="#2563eb" />}
+          icon={<Target size={24} color={colors.primary} />}
           items={plan.support_needs}
           emptyText="No se han definido necesidades de apoyo específicas"
         />
@@ -191,12 +203,12 @@ const styles = StyleSheet.create({
   },
   editButton: {
     padding: 8,
-    backgroundColor: '#eff6ff',
+    backgroundColor: colors.primaryBackground,
     borderRadius: 8,
   },
   deleteButton: {
     padding: 8,
-    backgroundColor: '#fef2f2',
+    backgroundColor: colors.errorBackground,
     borderRadius: 8,
   },
   content: {
@@ -217,7 +229,7 @@ const styles = StyleSheet.create({
   studentName: {
     fontSize: 18,
     fontWeight: '500',
-    color: '#2563eb',
+    color: colors.primary,
     marginBottom: 8,
   },
   planDate: {
@@ -256,7 +268,7 @@ const styles = StyleSheet.create({
   },
   bulletPoint: {
     fontSize: 16,
-    color: '#2563eb',
+    color: colors.primary,
     marginRight: 8,
     marginTop: 2,
   },
@@ -274,13 +286,13 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   errorText: {
-    color: '#dc2626',
+    color: colors.error,
     fontSize: 16,
     marginBottom: 16,
     textAlign: 'center',
   },
   backButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

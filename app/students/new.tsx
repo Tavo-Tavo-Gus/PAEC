@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Activi
 import { router } from 'expo-router';
 import { useStudents } from '@/hooks/useStudents';
 import { X, Save } from 'lucide-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '@/constants/colors';
 
 export default function NewStudentScreen() {
   const { addStudent } = useStudents();
@@ -47,22 +49,24 @@ export default function NewStudentScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => router.back()}
-        >
-          <X size={24} color="#64748b" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Nuevo Estudiante</Text>
-        <TouchableOpacity
-          style={[styles.saveButton, saving && styles.saveButtonDisabled]}
-          onPress={handleSave}
-          disabled={saving}
-        >
-          <Save size={24} color={saving ? "#94a3b8" : "#2563eb"} />
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView edges={['top']}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => router.back()}
+          >
+            <X size={24} color="#64748b" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Nuevo Estudiante</Text>
+          <TouchableOpacity
+            style={[styles.saveButton, saving && styles.saveButtonDisabled]}
+            onPress={handleSave}
+            disabled={saving}
+          >
+            <Save size={24} color={saving ? "#94a3b8" : colors.primary} />
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
 
       {error && (
         <View style={styles.errorContainer}>
@@ -73,7 +77,7 @@ export default function NewStudentScreen() {
       <ScrollView style={styles.form}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Información Personal</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Nombre <Text style={styles.required}>*</Text></Text>
             <TextInput
@@ -129,7 +133,7 @@ export default function NewStudentScreen() {
 
       {saving && (
         <View style={styles.savingOverlay}>
-          <ActivityIndicator size="large" color="#2563eb" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       )}
     </View>
@@ -165,12 +169,12 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   errorContainer: {
-    backgroundColor: '#fef2f2',
+    backgroundColor: colors.errorBackground,
     padding: 16,
     marginBottom: 16,
   },
   errorText: {
-    color: '#dc2626',
+    color: colors.error,
     fontSize: 16,
     textAlign: 'center',
   },
@@ -200,7 +204,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   required: {
-    color: '#dc2626',
+    color: colors.error,
   },
   input: {
     backgroundColor: '#f8fafc',

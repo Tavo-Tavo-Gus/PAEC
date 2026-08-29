@@ -1,7 +1,6 @@
-import { Stack } from 'expo-router';
+import { Stack, router, useRootNavigationState } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
-import { router, useRootNavigationState } from 'expo-router';
 
 export default function AuthLayout() {
   const { session } = useAuth();

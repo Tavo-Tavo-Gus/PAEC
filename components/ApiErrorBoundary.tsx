@@ -2,6 +2,7 @@ import React, { Component, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { rateLimitHandler } from '@/lib/errorHandler';
 import { RateLimitNotification } from './RateLimitNotification';
+import { colors } from '@/constants/colors';
 
 interface Props {
   children: ReactNode;
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   retryButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
