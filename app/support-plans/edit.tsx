@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSupportPlans } from '@/hooks/useSupportPlans';
 import { useStudents } from '@/hooks/useStudents';
 import { X, Save, Plus, Trash2 } from 'lucide-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Student } from '@/types/database.types';
 import { colors } from '@/constants/colors';
 
@@ -140,23 +141,28 @@ export default function EditPlanScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => router.back()}
-        >
-          <X size={24} color="#64748b" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Editar Plan de Apoyo</Text>
-        <TouchableOpacity
-          style={[styles.saveButton, saving && styles.saveButtonDisabled]}
-          onPress={handleSave}
-          disabled={saving}
-        >
-            <Save size={24} color={saving ? "#94a3b8" : colors.primary} />
-        </TouchableOpacity>
-      </View>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <SafeAreaView edges={['top']} style={{ backgroundColor: 'white' }}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => router.back()}
+          >
+            <X size={24} color="#64748b" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Editar Plan de Apoyo</Text>
+          <TouchableOpacity
+            style={[styles.saveButton, saving && styles.saveButtonDisabled]}
+            onPress={handleSave}
+            disabled={saving}
+          >
+              <Save size={24} color={saving ? "#94a3b8" : colors.primary} />
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
 
       {saveError && (
         <View style={styles.errorContainer}>
@@ -164,7 +170,11 @@ export default function EditPlanScreen() {
         </View>
       )}
 
-      <ScrollView style={styles.form}>
+      <ScrollView
+        style={styles.form}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.formContent}
+      >
         <View style={styles.studentInfo}>
           <Text style={styles.studentLabel}>Plan para:</Text>
           <Text style={styles.studentName}>{student?.name || 'Cargando...'}</Text>
@@ -197,7 +207,7 @@ export default function EditPlanScreen() {
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -247,6 +257,9 @@ const styles = StyleSheet.create({
   },
   form: {
     flex: 1,
+  },
+  formContent: {
+    paddingBottom: 40,
   },
   studentInfo: {
     backgroundColor: 'white',

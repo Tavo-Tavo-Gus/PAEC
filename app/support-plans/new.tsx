@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSupportPlans } from '@/hooks/useSupportPlans';
 import { useStudents } from '@/hooks/useStudents';
@@ -112,7 +112,10 @@ export default function NewPlanScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <SafeAreaView edges={['top']} style={{ backgroundColor: 'white' }}>
         <View style={styles.header}>
           <TouchableOpacity
@@ -138,7 +141,11 @@ export default function NewPlanScreen() {
         </View>
       )}
 
-      <ScrollView style={styles.form}>
+      <ScrollView
+        style={styles.form}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.formContent}
+      >
         <View style={styles.studentInfo}>
           <Text style={styles.studentLabel}>Plan para:</Text>
           <Text style={styles.studentName}>{student?.name || 'Estudiante no encontrado'}</Text>
@@ -171,7 +178,7 @@ export default function NewPlanScreen() {
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -215,6 +222,9 @@ const styles = StyleSheet.create({
   },
   form: {
     flex: 1,
+  },
+  formContent: {
+    paddingBottom: 40,
   },
   studentInfo: {
     backgroundColor: 'white',

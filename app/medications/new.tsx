@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Modal, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Modal, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useMedications } from '@/hooks/useMedications';
 import { useStudents } from '@/hooks/useStudents';
@@ -21,6 +21,7 @@ export default function NewMedicationScreen() {
   const [nextDoseDate, setNextDoseDate] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [recurrence, setRecurrence] = useState<'none' | 'daily' | 'weekly'>('none');
 
   const [medication, setMedication] = useState({
     name: '',
@@ -56,6 +57,7 @@ export default function NewMedicationScreen() {
         dosage: medication.dosage,
         frequency: medication.frequency,
         next_dose: nextDoseDate.toISOString(),
+        recurrence,
       });
 
       if (newMedication) {
@@ -116,7 +118,10 @@ export default function NewMedicationScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <SafeAreaView edges={['top']} style={{ backgroundColor: 'white' }}>
         <View style={styles.header}>
           <TouchableOpacity
@@ -142,7 +147,11 @@ export default function NewMedicationScreen() {
         </View>
       )}
 
-      <ScrollView style={styles.form}>
+      <ScrollView
+        style={styles.form}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.formContent}
+      >
         <View style={styles.studentInfo}>
           <Text style={styles.studentLabel}>Medicamento para:</Text>
           {params.student ? (
@@ -248,6 +257,35 @@ export default function NewMedicationScreen() {
               />
             )}
           </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Repetir</Text>
+            <View style={styles.recurrenceRow}>
+              {[
+                { value: 'none', label: 'No se repite' },
+                { value: 'daily', label: 'Todos los días' },
+                { value: 'weekly', label: 'Semanal' },
+              ].map(option => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.recurrenceChip,
+                    recurrence === option.value && styles.recurrenceChipActive,
+                  ]}
+                  onPress={() => setRecurrence(option.value as 'none' | 'daily' | 'weekly')}
+                >
+                  <Text
+                    style={[
+                      styles.recurrenceChipText,
+                      recurrence === option.value && styles.recurrenceChipTextActive,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
         </View>
       </ScrollView>
 
@@ -258,7 +296,7 @@ export default function NewMedicationScreen() {
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -302,6 +340,9 @@ const styles = StyleSheet.create({
   },
   form: {
     flex: 1,
+  },
+  formContent: {
+    paddingBottom: 40,
   },
   studentInfo: {
     backgroundColor: 'white',
@@ -384,6 +425,29 @@ const styles = StyleSheet.create({
   dateTimePlaceholder: {
     fontSize: 16,
     color: '#94a3b8',
+  },
+  recurrenceRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  recurrenceChip: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  recurrenceChipActive: {
+    backgroundColor: colors.primary,
+  },
+  recurrenceChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  recurrenceChipTextActive: {
+    color: '#ffffff',
   },
   savingOverlay: {
     ...StyleSheet.absoluteFillObject,

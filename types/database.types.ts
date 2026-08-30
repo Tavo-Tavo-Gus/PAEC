@@ -12,11 +12,11 @@ export interface Student {
 export interface Medication {
   id: string;
   student_id: string;
-  user_id: string;
   name: string;
   dosage: string;
   frequency: string;
   next_dose: string;
+  recurrence: 'none' | 'daily' | 'weekly';
   created_at: string;
   updated_at: string;
 }
@@ -38,6 +38,7 @@ export interface Event {
   type: string;
   start_time: string;
   end_time: string;
+  recurrence: 'none' | 'daily' | 'weekly';
   created_at: string;
   updated_at: string;
 }

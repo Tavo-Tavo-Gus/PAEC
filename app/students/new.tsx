@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { useStudents } from '@/hooks/useStudents';
 import { X, Save } from 'lucide-react-native';
@@ -48,7 +48,11 @@ export default function NewStudentScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+    >
       <SafeAreaView edges={['top']}>
         <View style={styles.header}>
           <TouchableOpacity
@@ -74,7 +78,11 @@ export default function NewStudentScreen() {
         </View>
       )}
 
-      <ScrollView style={styles.form}>
+      <ScrollView
+        style={styles.form}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.formContent}
+      >
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Información Personal</Text>
 
@@ -136,7 +144,7 @@ export default function NewStudentScreen() {
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -180,6 +188,9 @@ const styles = StyleSheet.create({
   },
   form: {
     flex: 1,
+  },
+  formContent: {
+    paddingBottom: 40,
   },
   section: {
     backgroundColor: 'white',

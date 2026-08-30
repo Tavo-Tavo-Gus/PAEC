@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { authRateLimiter } from '@/lib/rateLimiter';
 import { RateLimitNotification } from '@/components/RateLimitNotification';
@@ -50,13 +50,26 @@ export default function SignUpScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.keyboardAvoiding}
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
       <RateLimitNotification
         visible={showRateLimit}
         message={rateLimitMessage}
         onHide={() => setShowRateLimit(false)}
       />
-      
+
+      <View style={styles.brandContainer}>
+        <Image source={require('../../assets/images/icon.png')} style={styles.logo} />
+        <Text style={styles.brandName}>PAEC</Text>
+        <Text style={styles.brandTagline}>Acompañamiento emocional y conductual</Text>
+      </View>
+
       <Text style={styles.title}>Crear Cuenta</Text>
       
       {error && (
@@ -108,16 +121,42 @@ export default function SignUpScreen() {
           </TouchableOpacity>
         </Link>
       </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  keyboardAvoiding: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     padding: 20,
     justifyContent: 'center',
     backgroundColor: '#f8fafc',
+  },
+  brandContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  logo: {
+    width: 88,
+    height: 88,
+    borderRadius: 20,
+    marginBottom: 12,
+  },
+  brandName: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: 4,
+  },
+  brandTagline: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    paddingHorizontal: 24,
   },
   title: {
     fontSize: 24,

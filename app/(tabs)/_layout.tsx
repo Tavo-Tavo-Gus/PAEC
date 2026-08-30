@@ -2,11 +2,13 @@ import { Tabs, router, useRootNavigationState } from 'expo-router';
 import { Users, Calendar, Pill } from 'lucide-react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '@/constants/colors';
 
 export default function TabLayout() {
   const { session } = useAuth();
   const rootNavigationState = useRootNavigationState();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (!session && rootNavigationState?.key) {
@@ -17,13 +19,14 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
+        headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: '#64748b',
         tabBarStyle: {
           borderTopWidth: 1,
           borderTopColor: '#e2e8f0',
-          height: 60,
-          paddingBottom: 8,
+          height: 60 + insets.bottom,
+          paddingBottom: Math.max(insets.bottom, 8),
           paddingTop: 8,
         },
       }}>
@@ -32,8 +35,6 @@ export default function TabLayout() {
         options={{
           title: 'Estudiantes',
           tabBarIcon: ({ size, color }) => <Users size={size} color={color} />,
-          headerShown: true,
-          headerTitle: 'Lista de Estudiantes',
         }}
       />
       <Tabs.Screen
@@ -41,8 +42,6 @@ export default function TabLayout() {
         options={{
           title: 'Medicamentos',
           tabBarIcon: ({ size, color }) => <Pill size={size} color={color} />,
-          headerShown: true,
-          headerTitle: 'Medicamentos',
         }}
       />
       <Tabs.Screen
@@ -50,8 +49,6 @@ export default function TabLayout() {
         options={{
           title: 'Calendario',
           tabBarIcon: ({ size, color }) => <Calendar size={size} color={color} />,
-          headerShown: true,
-          headerTitle: 'Calendario',
         }}
       />
     </Tabs>

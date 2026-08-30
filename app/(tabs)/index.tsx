@@ -3,6 +3,7 @@ import { useStudents } from '@/hooks/useStudents';
 import { router } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RateLimitNotification } from '@/components/RateLimitNotification';
 import { Student } from '@/types/database.types';
 import { colors } from '@/constants/colors';
@@ -10,7 +11,7 @@ import { colors } from '@/constants/colors';
 export default function StudentsScreen() {
   const { students, loading, error, retryAfter, refresh } = useStudents();
   const [showRateLimit, setShowRateLimit] = useState(false);
-
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (retryAfter && error) {
@@ -36,15 +37,25 @@ export default function StudentsScreen() {
     );
   }
 
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(/\s+/);
+    const first = parts[0]?.[0] ?? '';
+    const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
+    return (first + last).toUpperCase();
+  };
+
   const renderStudent = ({ item }: { item: Student }) => (
     <TouchableOpacity
       style={styles.studentCard}
       onPress={() => router.push(`/students/${item.id}`)}
     >
-      <Image
-        source={{ uri: item.image_url || 'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg' }}
-        style={styles.studentImage}
-      />
+      {item.image_url ? (
+        <Image source={{ uri: item.image_url }} style={styles.studentImage} />
+      ) : (
+        <View style={styles.avatarPlaceholder}>
+          <Text style={styles.avatarInitials}>{getInitials(item.name)}</Text>
+        </View>
+      )}
       <View style={styles.studentInfo}>
         <Text style={styles.studentName}>{item.name}</Text>
         <Text style={styles.studentDetails}>{item.grade} • {item.age} años</Text>
@@ -59,6 +70,13 @@ export default function StudentsScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+        <View style={styles.brandHeader}>
+          <Image source={require('../../assets/images/icon.png')} style={styles.logo} />
+          <Text style={styles.title}>Lista de Estudiantes</Text>
+        </View>
+      </View>
+
       <RateLimitNotification
         visible={showRateLimit}
         message={error || 'Demasiadas solicitudes'}
@@ -76,15 +94,6 @@ export default function StudentsScreen() {
         renderItem={renderStudent}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
-        ListHeaderComponent={
-          <View style={styles.brandHeader}>
-            <Image source={require('../../assets/images/icon.png')} style={styles.logo} />
-            <View>
-              <Text style={styles.brandName}>PAEC</Text>
-              <Text style={styles.brandSubtitle}>Acompañamiento educativo</Text>
-            </View>
-          </View>
-        }
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={refresh} />
         }
@@ -111,6 +120,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f8fafc',
   },
+  header: {
+    backgroundColor: 'white',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#111827',
+  },
   errorText: {
     color: colors.error,
     fontSize: 16,
@@ -135,24 +156,13 @@ const styles = StyleSheet.create({
   brandHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
   },
   logo: {
-    width: 56,
-    height: 56,
-    borderRadius: 12,
-    marginRight: 14,
+    width: 36,
+    height: 36,
+    borderRadius: 9,
+    marginRight: 12,
   },
   brandName: {
     fontSize: 22,
@@ -185,6 +195,20 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     marginRight: 16,
+  },
+  avatarPlaceholder: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 16,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarInitials: {
+    color: '#ffffff',
+    fontSize: 22,
+    fontWeight: '700',
   },
   studentInfo: {
     flex: 1,

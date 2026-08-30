@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useMedications } from '@/hooks/useMedications';
 import { useStudents } from '@/hooks/useStudents';
 import { X, Save } from 'lucide-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Student } from '@/types/database.types';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format, isValid, parseISO } from 'date-fns';
@@ -18,6 +19,7 @@ export default function EditMedicationScreen() {
   const [nextDoseDate, setNextDoseDate] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [recurrence, setRecurrence] = useState<'none' | 'daily' | 'weekly'>('none');
 
   const [medication, setMedication] = useState({
     name: '',
@@ -39,6 +41,7 @@ export default function EditMedicationScreen() {
         });
         const parsedDate = parseISO(currentMedication.next_dose);
         setNextDoseDate(isValid(parsedDate) ? parsedDate : null);
+        setRecurrence(currentMedication.recurrence ?? 'none');
         
         const studentData = students.find(s => s.id === currentMedication.student_id);
         setStudent(studentData);
@@ -60,6 +63,7 @@ export default function EditMedicationScreen() {
       const result = await updateMedication(params.id, {
         ...medication,
         next_dose: nextDoseDate.toISOString(),
+        recurrence,
       });
 
       if (result) {
@@ -91,23 +95,28 @@ export default function EditMedicationScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => router.back()}
-        >
-          <X size={24} color="#64748b" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Editar Medicamento</Text>
-        <TouchableOpacity
-          style={[styles.saveButton, saving && styles.saveButtonDisabled]}
-          onPress={handleSave}
-          disabled={saving}
-        >
-          <Save size={24} color={saving ? "#94a3b8" : colors.primary} />
-        </TouchableOpacity>
-      </View>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <SafeAreaView edges={['top']} style={{ backgroundColor: 'white' }}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => router.back()}
+          >
+            <X size={24} color="#64748b" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Editar Medicamento</Text>
+          <TouchableOpacity
+            style={[styles.saveButton, saving && styles.saveButtonDisabled]}
+            onPress={handleSave}
+            disabled={saving}
+          >
+            <Save size={24} color={saving ? "#94a3b8" : colors.primary} />
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
 
       {saveError && (
         <View style={styles.errorContainer}>
@@ -115,7 +124,11 @@ export default function EditMedicationScreen() {
         </View>
       )}
 
-      <ScrollView style={styles.form}>
+      <ScrollView
+        style={styles.form}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.formContent}
+      >
         <View style={styles.studentInfo}>
           <Text style={styles.studentLabel}>Medicamento para:</Text>
           <Text style={styles.studentName}>{student?.name || 'Cargando...'}</Text>
@@ -206,6 +219,35 @@ export default function EditMedicationScreen() {
               />
             )}
           </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Repetir</Text>
+            <View style={styles.recurrenceRow}>
+              {[
+                { value: 'none', label: 'No se repite' },
+                { value: 'daily', label: 'Todos los días' },
+                { value: 'weekly', label: 'Semanal' },
+              ].map(option => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.recurrenceChip,
+                    recurrence === option.value && styles.recurrenceChipActive,
+                  ]}
+                  onPress={() => setRecurrence(option.value as 'none' | 'daily' | 'weekly')}
+                >
+                  <Text
+                    style={[
+                      styles.recurrenceChipText,
+                      recurrence === option.value && styles.recurrenceChipTextActive,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
         </View>
       </ScrollView>
 
@@ -214,7 +256,7 @@ export default function EditMedicationScreen() {
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -264,6 +306,9 @@ const styles = StyleSheet.create({
   },
   form: {
     flex: 1,
+  },
+  formContent: {
+    paddingBottom: 40,
   },
   studentInfo: {
     backgroundColor: 'white',
@@ -329,6 +374,29 @@ const styles = StyleSheet.create({
   dateTimePlaceholder: {
     fontSize: 16,
     color: '#94a3b8',
+  },
+  recurrenceRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  recurrenceChip: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  recurrenceChipActive: {
+    backgroundColor: colors.primary,
+  },
+  recurrenceChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  recurrenceChipTextActive: {
+    color: '#ffffff',
   },
   savingOverlay: {
     ...StyleSheet.absoluteFillObject,

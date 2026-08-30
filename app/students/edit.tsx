@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Save, X } from 'lucide-react-native';
 import { useStudents } from '@/hooks/useStudents';
@@ -70,7 +70,10 @@ export default function EditStudentScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <SafeAreaView edges={['top']} style={{ backgroundColor: 'white' }}>
         <View style={styles.header}>
           <TouchableOpacity
@@ -96,7 +99,11 @@ export default function EditStudentScreen() {
         </View>
       )}
 
-      <ScrollView style={styles.form}>
+      <ScrollView
+        style={styles.form}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.formContent}
+      >
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Información Personal</Text>
 
@@ -152,7 +159,7 @@ export default function EditStudentScreen() {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -202,6 +209,9 @@ const styles = StyleSheet.create({
   },
   form: {
     flex: 1,
+  },
+  formContent: {
+    paddingBottom: 40,
   },
   section: {
     backgroundColor: 'white',
